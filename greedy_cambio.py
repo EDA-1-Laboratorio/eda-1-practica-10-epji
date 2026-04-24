@@ -134,5 +134,12 @@ if __name__ == "__main__":
         print(f"  Casos con fallo  : {len(fal)}")
         if sub:
             print(f"  Primeros 5 subóptimos: {sub[:5]}")
+            print("\n  Al menos 3 casos donde greedy no es óptimo:")
+            for monto, total_greedy, total_dp in sub[:3]:
+                greedy = cambio_greedy(monto, no_canonicas)
+                dp = cambio_optimo_dp(monto, no_canonicas)
+                print(f"  Monto {monto}:")
+                print(f"    Greedy: {greedy[0]} -> {total_greedy} monedas")
+                print(f"    Óptimo DP: {dp[0]} -> {total_dp} monedas")
     else:
         print("  comparar_estrategias aún no implementada")
