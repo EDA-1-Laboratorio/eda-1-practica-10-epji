@@ -16,6 +16,7 @@ import random
 # ---------------------------------------------------------------------------
 
 def insertion_sort_metricas(arr: list) -> tuple:
+ 
     """
     Ordena 'arr' usando insertion sort e instrumenta la ejecución.
 
@@ -44,11 +45,21 @@ def insertion_sort_metricas(arr: list) -> tuple:
         #           - incrementa comparaciones
         #           - desplaza arr[j] a arr[j+1], incrementa movimientos
         #           - decrement j
+    
+    while j>=0 and arr[j] > llave:
+            comparaciones +=1
+            arr[j + 1] = arr[j]
+            movimientos += 1
+            j -= 1
 
         # TODO: cuenta la comparación que termina el while (si j >= 0)
+    if j >= 0:
+         comparaciones += 1
 
         # TODO: coloca llave en arr[j + 1] e incrementa movimientos
-
+    arr[j + 1] = llave
+    movimientos += 1
+    
     tiempo = time.perf_counter() - inicio
     return (arr, comparaciones, movimientos, tiempo)
 
@@ -57,56 +68,27 @@ def insertion_sort_metricas(arr: list) -> tuple:
 # Problema B – Generación de escenarios
 # ---------------------------------------------------------------------------
 
-def generar_arreglo(n: int, escenario: str) -> list:
-    """
-    Genera un arreglo de tamaño n según el escenario indicado.
-
-    Escenarios:
-        'mejor'    -> ya ordenado de menor a mayor    (mejor caso: Θ(n))
-        'peor'     -> inversamente ordenado            (peor caso:  Θ(n²))
-        'promedio' -> aleatorio                        (caso promedio: Θ(n²))
-
-    Pistas:
-        list(range(n))           arreglo [0, 1, 2, ..., n-1]
-        list(range(n, 0, -1))    arreglo [n, n-1, ..., 1]
-        random.shuffle(arr)      mezcla in-place
-    """
-    # TODO: implementa los tres escenarios; lanza ValueError si escenario es inválido.
-    pass
-
-
-def medir_escenarios(tamanos: list) -> list:
-    """
-    Para cada tamaño en 'tamanos' evalúa los tres escenarios e imprime resultados.
-
-    Retorna:
-        Lista de dicts: {tamano, escenario, comparaciones, movimientos, tiempo}
-    """
-    resultados = []
-    for n in tamanos:
-        for escenario in ("mejor", "promedio", "peor"):
-            arr = generar_arreglo(n, escenario)
-            # TODO: llama a insertion_sort_metricas y guarda el resultado.
-            # Estructura del dict:
-            # {
-            #   "tamano": n,
-            #   "escenario": escenario,
-            #   "comparaciones": ...,
-            #   "movimientos": ...,
-            #   "tiempo": ...
-            # }
-            pass
-    return resultados
-
-
-# ---------------------------------------------------------------------------
-# Problema D – Versión híbrida (insertion sort + merge sort)
-# ---------------------------------------------------------------------------
-
 def _merge(izq: list, der: list) -> list:
     """Combina dos listas ordenadas en una sola."""
     # TODO: implementa la fusión estándar de merge sort.
-    pass
+
+    resultado = []
+    i = j = 0
+
+    while i < len(izq) and j < len(der):
+        if izq[i] <= der[j]:
+            resultado.append(izq[i])
+            i += 1
+        else:
+            resultado.append(der[j])
+            j += 1
+
+    resultado.extend(izq[i:])
+    resultado.extend(der[j:])
+
+    return resultado
+
+    
 
 
 def _merge_sort_hibrido(arr: list, umbral: int) -> list:
@@ -117,10 +99,15 @@ def _merge_sort_hibrido(arr: list, umbral: int) -> list:
     """
     if len(arr) <= umbral:
         # TODO: retorna insertion_sort_metricas(arr)[0]
-        pass
+        return insertion_sort_metricas(arr)[0]
+        
     mid = len(arr) // 2
     # TODO: llama recursivamente y fusiona con _merge
-    pass
+    izq = _merge_sort_hibrido(arr[:mid], umbral)
+    der = _merge_sort_hibrido(arr[mid:], umbral)
+
+    return _merge(izq, der)
+    
 
 
 def insertion_sort_hibrido(arr: list, umbral: int = 32) -> list:
@@ -129,7 +116,8 @@ def insertion_sort_hibrido(arr: list, umbral: int = 32) -> list:
     Retorna el arreglo ordenado.
     """
     # TODO: llama a _merge_sort_hibrido
-    pass
+    return _merge_sort_hibrido(arr, umbral)
+    
 
 
 # ---------------------------------------------------------------------------
@@ -148,3 +136,17 @@ if __name__ == "__main__":
                   f"{r['tiempo']:>12.4f}")
     else:
         print("medir_escenarios aún no implementada.")
+
+        import time
+
+T_values = [8, 16, 32, 64]
+n = 8000
+
+for T in T_values:
+    arr = generar_arreglo(n, "promedio")
+
+    inicio = time.perf_counter()
+    insertion_sort_hibrido(arr, T)
+    tiempo = time.perf_counter() - inicio
+
+    print("T =", T, "| tiempo =", round(tiempo, 4))
