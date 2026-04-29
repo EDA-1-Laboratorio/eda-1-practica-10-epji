@@ -23,37 +23,45 @@ ALNUM      = string.ascii_letters + string.digits
 # Problema A – Generación y búsqueda exhaustiva
 # ---------------------------------------------------------------------------
 
+import itertools
+import string
+import time
+
+# ---------------------------------------------------------------------------
+# Alfabetos predefinidos
+# ---------------------------------------------------------------------------
+DIGITOS    = string.digits                  # '0123456789'
+MINUSCULAS = string.ascii_lowercase         # 'abcdefghijklmnopqrstuvwxyz'
+ALNUM      = string.ascii_letters + string.digits
+
+# ---------------------------------------------------------------------------
+# Problema A – Generación y búsqueda exhaustiva
+# ---------------------------------------------------------------------------
+
 def generar_candidatos(alfabeto: str, longitud: int):
     """
     Genera (como iterador) todas las cadenas de exactamente 'longitud'
     caracteres del alfabeto dado.
-
-    Pistas:
-        itertools.product(alfabeto, repeat=longitud) produce tuplas de caracteres.
-        "".join(tupla) convierte una tupla en cadena.
     """
-    # TODO: implementa con itertools.product y yield o return del iterador
-    pass
+    # Generamos el producto cartesiano y unimos cada tupla en una cadena
+    for tupla in itertools.product(alfabeto, repeat=longitud):
+        yield "".join(tupla)
 
-
-def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
+def buscar_cadena_objetivo(objetivo: str, alfabeto: str, 
                            min_len: int = 1) -> tuple:
     """
     Busca 'objetivo' recorriendo todas las cadenas del alfabeto de longitud
     min_len hasta len(objetivo) (inclusive).
-
-    Retorna:
-        (encontrada: bool, intentos: int, tiempo_seg: float)
     """
     intentos = 0
     inicio   = time.perf_counter()
 
     for longitud in range(min_len, len(objetivo) + 1):
         for candidato in generar_candidatos(alfabeto, longitud):
-            # TODO: incrementa intentos
-            # TODO: si candidato == objetivo, calcula el tiempo y retorna
-            #       (True, intentos, tiempo)
-            pass
+            intentos += 1
+            if candidato == objetivo:
+                tiempo = time.perf_counter() - inicio
+                return (True, intentos, tiempo)
 
     tiempo = time.perf_counter() - inicio
     return (False, intentos, tiempo)
