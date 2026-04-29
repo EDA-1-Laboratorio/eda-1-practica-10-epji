@@ -74,34 +74,21 @@ def buscar_cadena_objetivo(objetivo: str, alfabeto: str,
 def combinar_teoricas(alfabeto: str, min_len: int, max_len: int) -> int:
     """
     Calcula el número teórico de cadenas a explorar.
-
-    Fórmula: suma de |alfabeto|^k  para k en [min_len, max_len]
-
-    Pistas:
-        sum(expr for k in range(...)) es la forma idiomática.
-        len(alfabeto) da |Σ|.
+    Fórmula: suma de |alfabeto|^k para k en [min_len, max_len]
     """
-    # TODO: implementa la fórmula
-    pass
+    base = len(alfabeto)
+    return sum(base**k for k in range(min_len, max_len + 1))
 
 
 # ---------------------------------------------------------------------------
 # Problema C – Optimización con poda por prefijo
 # ---------------------------------------------------------------------------
 
-def buscar_con_poda(objetivo: str, alfabeto: str,
+
+def buscar_con_poda(objetivo: str, alfabeto: str, 
                     prefijos_validos: set) -> tuple:
     """
-    Variante con poda: antes de contar un candidato, verifica que cada uno
-    de sus prefijos propios esté en 'prefijos_validos'.  Si algún prefijo
-    falta, descarta la rama completa (usa continue).
-
-    Retorna:
-        (encontrada: bool, intentos: int, tiempo_seg: float)
-
-    Pistas:
-        El prefijo de longitud k de 'cadena' es candidato[:k].
-        Prueba prefijos para k en range(1, len(candidato)).
+    Variante con poda: verifica que cada prefijo propio esté en 'prefijos_validos'.
     """
     intentos = 0
     inicio   = time.perf_counter()
@@ -109,16 +96,25 @@ def buscar_con_poda(objetivo: str, alfabeto: str,
     for longitud in range(1, len(objetivo) + 1):
         for partes in itertools.product(alfabeto, repeat=longitud):
             candidato = "".join(partes)
+            
+            # PODA: Verificar prefijos propios (de longitud 1 hasta longitud-1)
+            # Si el prefijo no es válido, no tiene sentido seguir explorando esta rama.
+            poda_activa = False
+            for k in range(1, len(candidato)):
+                if candidato[:k] not in prefijos_validos:
+                    poda_activa = True
+                    break
+            
+            if poda_activa:
+                continue
 
-            # TODO: verifica los prefijos; si alguno no está en
-            #       prefijos_validos, usa 'continue' para saltar.
-
-            # TODO: incrementa intentos y compara con objetivo.
-            pass
+            intentos += 1
+            if candidato == objetivo:
+                tiempo = time.perf_counter() - inicio
+                return (True, intentos, tiempo)
 
     tiempo = time.perf_counter() - inicio
     return (False, intentos, tiempo)
-
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -130,14 +126,8 @@ if __name__ == "__main__":
         print(f"  Intentos : {intentos}")
         print(f"  Tiempo   : {t:.4f} s")
         print(f"  Tasa     : {intentos / t:.0f} candidatos/s")
-    else:
-        print("  generar_candidatos aún no implementada (o target no encontrado)")
-
+    
     print("\n=== Combinaciones teóricas ===")
-    for max_len in [3, 4]:
+    for max_len in [3, 4, 5]:
         n = combinar_teoricas(DIGITOS, 1, max_len)
-        if n is not None:
-            print(f"  Dígitos hasta longitud {max_len}: {n:,} candidatos")
-        else:
-            print("  combinar_teoricas aún no implementada")
-        break
+        print(f"  Dígitos hasta longitud {max_len}: {n:,} candidatos")
